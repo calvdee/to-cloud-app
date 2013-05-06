@@ -1,0 +1,125 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Sign in &middot; Twitter Bootstrap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href={% static "lib/bootstrap/css/bootstrap.min.css"%} rel="stylesheet">
+    
+    <style type="text/css">
+      body {
+        padding-top: 40px;
+        padding-bottom: 40px;
+        background-color: #f5f5f5;
+      }
+
+      .main-form {
+        max-width: 375px;
+        padding: 29px 29px;
+        margin: 0 auto 20px;
+        background-color: #fff;
+        border: 1px solid #e5e5e5;
+        -webkit-border-radius: 5px;
+           -moz-border-radius: 5px;
+                border-radius: 5px;
+        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                box-shadow: 0 1px 2px rgba(0,0,0,.05);
+      }
+      .form-signin .form-signin-heading,
+      .form-signin .checkbox {
+        margin-bottom: 10px;
+      }
+      .form-signin input[type="text"]{
+        font-size: 16px;
+        height: auto;
+        margin-bottom: 15px;
+        padding: 7px 9px;
+      }
+      .no-padding hr {
+        padding: 0;
+      }
+    </style>
+    <link href={% static "lib/bootstrap/css/bootstrap-responsive.min.css" %} rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="row-fluid">
+        <span class="span12">
+          <ul class="inline text-right">
+            <li><a class="btn-link">Login</a></li>
+            <li>|</li>
+            <li><a class="btn-link">About</a></li>
+          </ul>
+        </span>
+      </div>
+      
+
+        <!--<form class="form-inline form-signin">
+          <h4 class="form-signin-heading">To Cloud</h4>
+          <input class="input-xlarge" type="text" placeholder=".input-xlarge">
+          <button class="btn btn-primary" type="submit">Go</button>
+        </form>-->
+        <div class="row-fluid main-form">
+          <h5>Download this URL to cloud services !</h5>
+          <form class="form-inline">
+            <input type="text" class="input-xlarge" placeholder="Url">
+            <button type="submit" class="btn-small btn-primary">Download</button>
+            <span class="help-block">
+              <hr />
+              <h5>Services</h5>
+              <label class="checkbox">
+                  <input type="checkbox">Dropbox</input>
+              </label>
+            </span>
+
+            <span class="help-block">
+              <label class="checkbox">
+                  <input type="checkbox">S3</input>
+              </label>
+            </span>
+            </span>
+          </form>
+        </div><!--/row-->
+
+        <div class="row-fluid">
+          <span class="span4"></span>
+          <span class="span4"></span>
+          <span class="span4"></span>
+        </div>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- <script src="../assets/js/jquery.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-transition.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-alert.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-modal.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-dropdown.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-scrollspy.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-tab.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-tooltip.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-popover.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-button.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-collapse.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-carousel.js"></script>-->
+    <!-- <script src="../assets/js/bootstrap-typeahead.js"></script>-->
+
+  </body>
+</html>

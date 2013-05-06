@@ -1,0 +1,12 @@
+"""
+The states of of UrlUpload
+"""
+
+CREATED=0
+QUEUED=1
+PENDING=2
+STARTED=3
+SUCCESS=4
+FAILURE=5
+RETRY=6
+REVOKED=7

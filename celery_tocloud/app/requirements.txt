@@ -1,0 +1,4 @@
+celery
+redis
+eventlet
+-e git+http://github.com/calvdee/dropbox_python_sdk.git@development#egg=dropbox
