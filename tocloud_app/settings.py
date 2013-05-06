@@ -122,11 +122,12 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djcelery',
-    'rest_framework',
+    # 'rest_framework',
+    # 'djangojs',
+    # 'ember',
 
     'celery_tocloud',       # Celery Application
-    'django_api_tocloud',   # Web Application
-    'django_tocloud',       # Web Service Application
+    'django_tocloud',       # Web Application
 
 
     # Uncomment the next line to enable the admin:
