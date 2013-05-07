@@ -31,3 +31,6 @@ hr {
   margin-bottom: 0px;
 }
 
+.asteriskField {
+    display: none;
+}

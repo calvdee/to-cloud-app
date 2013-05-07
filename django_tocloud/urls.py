@@ -1,7 +1,6 @@
 from django.conf.urls import patterns, include, url
-from django.views.generic import TemplateView
+from django_tocloud.views import UrlUploadFormView
 
 urlpatterns = patterns('',
-    (r'^$', TemplateView.as_view(template_name="home.html")),
-    (r'^app/$', TemplateView.as_view(template_name="index.html")),
+    url(r'^$', UrlUploadFormView.as_view()),
 )

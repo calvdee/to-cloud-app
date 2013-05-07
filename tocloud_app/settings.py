@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djcelery',
+    'crispy_forms',
     # 'rest_framework',
     # 'djangojs',
     # 'ember',
