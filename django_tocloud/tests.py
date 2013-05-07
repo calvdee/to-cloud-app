@@ -4,7 +4,12 @@ from django.contrib.auth.models import User
 
 from django_tocloud import states
 from django_tocloud.models import URLUpload
+from django_tocloud.views import URLUploadFormView
+from django.core.urlresolvers import reverse
 # Your tests here
+
+factory = RequestFactory()
+client = Client()
 
 class URLUploadTest(TestCase):
 	""" Tests the URLUpload model """
@@ -34,8 +39,33 @@ class URLUploadTest(TestCase):
 
 		self.assertEqual(upload.state, states.CREATED)
 
-class HomeViewTest(TestCase):
+class URLUploadFormViewTest(TestCase):
 	""" 
-	Tests the HomeView which contains the URLUpload form.
+	Tests the ``UrlUploadFormView`` view which sets a test cookie and renders
+	the ``AuthenticationFormView``.
+
+	The request to ``AuthenticationFormView`` should get the session from the 
+	``UrlUploadFormView`` response.
 	"""
-	pass
+	view = URLUploadFormView
+
+
+	def test_set_test_cookie(self):
+		data = { 'url': 'http://github.com/django/django/blob/master/django/views/generic/edit.py'}
+		
+		# Get the response
+		response = client.post(reverse('url_upload_view'), data)
+
+		# Make sure the test cookie was set
+		self.assertFalse(client.session == {})
+		self.assertNotEqual(client.session.get('testcookie'), None)
+		
+		
+
+		
+
+	
+
+
+
+	

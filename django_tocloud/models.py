@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django_tocloud import states
 
 # Create your models here.
-class UrlUpload(models.Model):
+class URLUpload(models.Model):
 	"""
 	A URL to upload to dropbox that belongs to a User and has state.
 	"""
