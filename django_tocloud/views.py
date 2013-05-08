@@ -21,7 +21,7 @@ class URLUploadFormView(FormView):
     # Set the test cookie for the authentication view 
     self.request.session.set_test_cookie()
 
-    # Generate the auth URL and form URL
+    # Generate the auth URL and form URL and 
     # TODO: Wrap in transaction?
     self.request.session['dropbox_auth_url'] = self.generate_drobox_auth()
     self.request.session['url'] = form.clean().get('url')
@@ -41,7 +41,7 @@ class URLUploadFormView(FormView):
     # Generate `session[''dropbox_auth_url'']
 
 
-class AuthenticationFormView(TemplateView):
+class DropboxAuthView(TemplateView):
   """
   Renders the form to to authenticate with Dropbox and confirm email.
   """
@@ -52,11 +52,14 @@ class AuthenticationFormView(TemplateView):
     Override to check that `testcookie` is in the session. 
     """
 
+    context = self.get_context_data(**kwargs)
+
     if request.session is None or not request.session.test_cookie_worked():
       # TODO: Render an error message
       pass
+    
+    return self.render_to_response(context)
 
-    super(AuthenticationFormView, self).get(request, *args, **kwargs)
 
 
 

@@ -4,6 +4,7 @@ from django import forms
 
 class URLForm(forms.Form):
     url = forms.URLField(required=True, label='')
+    email = forms.EmailField(required=True, label='')
 
     def __init__(self, *args, **kwargs):
         super(URLForm, self).__init__(*args, **kwargs)
@@ -20,14 +21,7 @@ class URLForm(forms.Form):
           ),
           MultiField(
             "Please enter your email so we can notify you when it's in Dropbox:) ",
-            Field('url', css_class='input-xlarge', placeholder='myemail@address.com'),
+            Field('email', css_class='input-xlarge', placeholder='myemail@address.com'),
             Submit('submit', 'Submit', css_class='btn-primary'),
           )
         )
-          # Fieldset(
-          #     '<h5>Upload a file to <a href="http://dropbox.com" target="_blank">Dropbox</a>!</h5>',
-          #     'url',
-          # ),
-          # ButtonHolder(
-          #       Submit('submit', 'Submit', css_class='btn-primary')
-          #   ),

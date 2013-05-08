@@ -51,22 +51,33 @@ class URLUploadFormViewTest(TestCase):
 
 
 	def test_session(self):
-		data = { 'url': 'http://github.com/django/django/blob/master/django/views/generic/edit.py'}
+		data = { 
+			'url': 'http://abc.com',
+			'email': 'myemail@address.com'
+		}
 		
 		# POST to get the session
 		response = client.post(reverse('url_upload_view'), data)
 
 		# Make sure the test cookie was set
-		self.assertFalse(client.session == {})
+		self.assertNotEqual(client.session, {})
 		self.assertNotEqual(client.session.get('testcookie'), None)
 
 		# Make sure the `dropbox_auth_url` and `url` were set
 		self.assertNotEqual(client.session.get('dropbox_auth_url'), None)
 		self.assertNotEqual(client.session.get('url'), None)
-
-
 		
-		
+class DropboxAuthViewTest(TestCase):
+	"""
+	Tests the ``DropboxAuthView``.  If there is no session, there should be
+	some kind of exception message generated.
+	"""
+
+	def test_no_session(self):
+		response = client.get(reverse('dropbox_auth_view'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(client.session, {})
 
 		
 
@@ -75,3 +86,7 @@ class URLUploadFormViewTest(TestCase):
 
 
 	
+
+# class Auth
+
+# class AuthDropboxIntegrationTest 
