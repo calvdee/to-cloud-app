@@ -4,8 +4,13 @@ body {
   background-color: #f5f5f5;
 }
 
+/* Scale the input boxes*/
+input {
+    max-width: 100%;
+} 
+
 .application {
-  max-width: 365px;
+  /*max-width: 575px;*/
   padding: 29px 29px;
   margin: 0 auto 20px;
   background-color: #fff;

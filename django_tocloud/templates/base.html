@@ -33,8 +33,10 @@
         
       <!-- Application -->
       <main>
-        <div class="row-fluid application">
-          {% block content %}{% endblock %}
+        <div class="row-fluid">
+          <span class="span4"></span>
+          <span class="span4 application">{% block content %}{% endblock %}</span>
+          <span class="span4"></span>
         </div>
       </main>
 

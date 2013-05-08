@@ -17,6 +17,10 @@ class URLForm(forms.Form):
           MultiField(
             '<h5>Upload a file to <a href="http://dropbox.com" target="_blank">Dropbox</a>!</h5>',
             Field('url', css_class='input-xlarge', placeholder='http://'),
+          ),
+          MultiField(
+            "Please enter your email so we can notify you when it's in Dropbox:) ",
+            Field('url', css_class='input-xlarge', placeholder='myemail@address.com'),
             Submit('submit', 'Submit', css_class='btn-primary'),
           )
         )
