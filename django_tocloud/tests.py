@@ -50,15 +50,21 @@ class URLUploadFormViewTest(TestCase):
 	view = URLUploadFormView
 
 
-	def test_set_test_cookie(self):
+	def test_session(self):
 		data = { 'url': 'http://github.com/django/django/blob/master/django/views/generic/edit.py'}
 		
-		# Get the response
+		# POST to get the session
 		response = client.post(reverse('url_upload_view'), data)
 
 		# Make sure the test cookie was set
 		self.assertFalse(client.session == {})
 		self.assertNotEqual(client.session.get('testcookie'), None)
+
+		# Make sure the `dropbox_auth_url` and `url` were set
+		self.assertNotEqual(client.session.get('dropbox_auth_url'), None)
+		self.assertNotEqual(client.session.get('url'), None)
+
+
 		
 		
 

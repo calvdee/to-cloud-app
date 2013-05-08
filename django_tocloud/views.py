@@ -13,12 +13,33 @@ class URLUploadFormView(FormView):
   success_url = '/app/auth/'
 
   def form_valid(self, form):
+    """
+    Override to set a test cookie when the form is posted and the data
+    is valid in the form.
+    """
+
     # Set the test cookie for the authentication view 
     self.request.session.set_test_cookie()
+
+    # Generate the auth URL and form URL
+    # TODO: Wrap in transaction?
+    self.request.session['dropbox_auth_url'] = self.generate_drobox_auth()
+    self.request.session['url'] = form.clean().get('url')
+    
 
     # This method is called when valid form data has been POSTed.
     # It should return an HttpResponse.
     return super(URLUploadFormView, self).form_valid(form)
+
+  def generate_drobox_auth(self):
+    """
+    Generates the URL to authenticate with Dopbox.
+    """
+    # Set `session['url']`
+    return 'testauthurl'
+
+    # Generate `session[''dropbox_auth_url'']
+
 
 class AuthenticationFormView(TemplateView):
   """
