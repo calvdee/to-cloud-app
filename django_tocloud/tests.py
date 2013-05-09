@@ -103,14 +103,14 @@ class DropboxAuthViewTest(TestCase):
 
 	def test_no_session(self):
 		"""
-		GETing the DropboxAuthView should have no session but still return
-		200 OK.
+		GETing the DropboxAuthView should redirect returning 302 status code
+		when there is no session.
 		"""
 		client = Client()
 
 		response = client.get(reverse('dropbox_auth_view'))
 
-		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.status_code, 302)
 		self.assertEqual(client.session, {})
 	
 # class Auth
