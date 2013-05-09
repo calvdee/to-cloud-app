@@ -1,6 +1,7 @@
 from django_tocloud.forms import URLForm
 from django.views.generic.edit import FormView
 from django.views.generic.base import View, TemplateView
+from django_tocloud.models import DropboxConfig
 
 class URLUploadFormView(FormView):
   """
@@ -19,27 +20,27 @@ class URLUploadFormView(FormView):
     """
 
     # Set the test cookie for the authentication view 
+    # TODO: Cookie should expire at browser close
     self.request.session.set_test_cookie()
 
-    # Generate the auth URL and form URL and 
-    # TODO: Wrap in transaction?
-    self.request.session['dropbox_auth_url'] = self.generate_drobox_auth()
-    self.request.session['url'] = form.clean().get('url')
-    
+    self.request.session['url'] = form.clean().get('url')    
 
     # This method is called when valid form data has been POSTed.
     # It should return an HttpResponse.
     return super(URLUploadFormView, self).form_valid(form)
 
-  def generate_drobox_auth(self):
+  def generate_drobox_auth(self, session):
     """
     Generates the URL to authenticate with Dopbox.
     """
-    # Set `session['url']`
-    return 'testauthurl'
+    # Generate the auth URL and form URL and 
+    # TODO: Wrap in transaction?
+    dropbox = DropboxConfig.get_session()
+    token = dropbox.obtain_request_token()
+    url = dropbox.build_authorize_url(token)
 
-    # Generate `session[''dropbox_auth_url'']
-
+    session['dropbox_auth_url'] = url
+    session['request_token'] = token
 
 class DropboxAuthView(TemplateView):
   """
@@ -54,9 +55,8 @@ class DropboxAuthView(TemplateView):
 
     context = self.get_context_data(**kwargs)
 
-    if request.session is None or not request.session.test_cookie_worked():
-      # TODO: Render an error message
-      pass
+    if len(request.session.keys()) is 0:
+      context['no_session'] = True
     
     return self.render_to_response(context)
 

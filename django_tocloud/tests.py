@@ -1,15 +1,16 @@
+from urlparse import urlparse
 from django.test.client import Client, RequestFactory
 from django.test import TestCase
 from django.contrib.auth.models import User
 
 from django_tocloud import states
-from django_tocloud.models import URLUpload
+from django_tocloud.models import URLUpload, DropboxConfig
 from django_tocloud.views import URLUploadFormView
 from django.core.urlresolvers import reverse
-# Your tests here
+
+from redis_sessions.session import SessionStore
 
 factory = RequestFactory()
-client = Client()
 
 class URLUploadTest(TestCase):
 	""" Tests the URLUpload model """
@@ -51,6 +52,8 @@ class URLUploadFormViewTest(TestCase):
 
 
 	def test_session(self):
+		client = Client()
+
 		data = { 
 			'url': 'http://abc.com',
 			'email': 'myemail@address.com'
@@ -67,6 +70,31 @@ class URLUploadFormViewTest(TestCase):
 		self.assertNotEqual(client.session.get('dropbox_auth_url'), None)
 		self.assertNotEqual(client.session.get('url'), None)
 		
+
+	def test_generate_drobox_auth(self):
+		"""
+		The ``generate_drobox_auth`` method should add the Dropbox auth URL
+		and access token to the session.
+		"""
+
+		# Make sure the DropboxConfig class works
+		session = DropboxConfig.get_session()
+		self.assertNotEqual(session, None)
+
+		# Call the method and make sure dropbox_auth_url and
+		# request token were set
+		s = SessionStore()
+		view = URLUploadFormView()
+		view.generate_drobox_auth(s)
+
+		# The keys that the method should have generated exist
+		self.assertTrue('dropbox_auth_url' in s.keys())
+		self.assertTrue('request_token' in s.keys())
+
+		# There is a valid dropbox URL
+		parsed = urlparse(s['dropbox_auth_url'])
+		self.assertEqual(parsed.netloc, 'www.dropbox.com')
+
 class DropboxAuthViewTest(TestCase):
 	"""
 	Tests the ``DropboxAuthView``.  If there is no session, there should be
@@ -74,19 +102,17 @@ class DropboxAuthViewTest(TestCase):
 	"""
 
 	def test_no_session(self):
+		"""
+		GETing the DropboxAuthView should have no session but still return
+		200 OK.
+		"""
+		client = Client()
+
 		response = client.get(reverse('dropbox_auth_view'))
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(client.session, {})
-
-		
-
 	
-
-
-
-	
-
 # class Auth
 
 # class AuthDropboxIntegrationTest 

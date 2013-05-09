@@ -3,4 +3,7 @@
 
 {% block content %}  
 	<a href="#">The link from the session</a>
+	{% if no_session %}
+		<p>{{ no_session }}</p>
+	{% endif %}
 {% endblock %}
