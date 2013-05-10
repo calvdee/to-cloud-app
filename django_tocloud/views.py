@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 
 from django_tocloud.forms import URLForm
 from django_tocloud.models import DropboxConfig
-
+from dropbox.rest import ErrorResponse
 
 class URLUploadFormView(FormView):
   """
@@ -29,6 +29,7 @@ class URLUploadFormView(FormView):
     s.set_test_cookie()
 
     s['url'] = form.clean().get('url')    
+    s['email'] = form.clean().get('email')    
 
     self.generate_drobox_auth(s)
 
@@ -42,8 +43,13 @@ class URLUploadFormView(FormView):
     """
     # Generate the auth URL and form URL and 
     # TODO: Wrap in transaction?
-    dropbox = DropboxConfig.get_session()
-    token = dropbox.obtain_request_token()
+    try:
+      dropbox = DropboxConfig.get_session()
+      token = dropbox.obtain_request_token()
+    except ErrorResponse as e:
+      # TODO: handle and log
+      raise e
+
     callback = reverse('final_view')
     url = dropbox.build_authorize_url(token, callback)
 
@@ -62,7 +68,6 @@ class DropboxAuthView(TemplateView):
     """ 
     Override to check that `testcookie` is in the session. 
     """
-
     context = self.get_context_data(**kwargs)
 
     check_session(request.session)
@@ -81,9 +86,9 @@ class FinalView(TemplateView):
 
   def get(self, request, *args, **kwargs):
     """ 
-    Override to check that `testcookie` is in the session. 
+    Override to create the URLUpload and OAuthToken objects and start
+    the upload task.
     """
-
     context = self.get_context_data(**kwargs)
 
     check_session(request.session)
@@ -92,11 +97,34 @@ class FinalView(TemplateView):
     auth_success = not request.GET.get('not_approved')
 
     if auth_success:
+      s = request.session
+      req_token = get_access_token(s.get('request_token'))
+
+      # Create the objects
+      token = create_access_token(req_token)
+      url_upload = URLUpload.objects.create(email=s.get('email'), 
+                                            url=s.get('url'),
+                                            access_token=token)
       # Start the job
 
       # Save the ``oauth_token`` and ``uid`` tokens
 
     return self.render_to_response(context)
+
+  def create_access_token(self, request_token):
+    """
+    Returns an OAuthToken object created from the request_token.
+    """
+    try:
+      dropbox = DropboxConfig.get_session()
+      token = dropbox.obtain_access_token(request_token)
+    except ErrorResponse as e:
+      # TODO: Handle and log
+      raise e
+
+    o = OAuthToken.objects.create(access_key=token.key, secret=token.secret)
+    
+    return o
 
 def check_session(session):
   """ Checks to see if there is a valid session, redirects if not """

@@ -4,8 +4,8 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 
 from django_tocloud import states
-from django_tocloud.models import URLUpload, DropboxConfig
-from django_tocloud.views import URLUploadFormView
+from django_tocloud.models import URLUpload, DropboxConfig, OAuthToken
+from django_tocloud.views import URLUploadFormView, FinalView
 from django.core.urlresolvers import reverse
 
 from redis_sessions.session import SessionStore
@@ -39,6 +39,7 @@ class URLUploadTest(TestCase):
 		upload = URLUpload.objects.create(user=user, url=url)
 
 		self.assertEqual(upload.state, states.CREATED)
+
 
 class URLUploadFormViewTest(TestCase):
 	""" 
@@ -95,6 +96,7 @@ class URLUploadFormViewTest(TestCase):
 		parsed = urlparse(s['dropbox_auth_url'])
 		self.assertEqual(parsed.netloc, 'www.dropbox.com')
 
+
 class DropboxAuthViewTest(TestCase):
 	"""
 	Tests the ``DropboxAuthView``.  If there is no session, there should be
@@ -112,7 +114,26 @@ class DropboxAuthViewTest(TestCase):
 
 		self.assertEqual(response.status_code, 302)
 		self.assertEqual(client.session, {})
-	
-# class Auth
 
-# class AuthDropboxIntegrationTest 
+
+class FinalViewTest(TestCase):
+	"""
+	Tests the FinalView which creates the URLUpload and OAuthToken objects
+	when there is valid session data.
+	"""
+
+	def setUp(self):
+		"""
+		Create the mock session.
+		"""
+		s = SessionStore()
+		view = URLUploadFormView()
+		view.generate_drobox_auth(s)
+
+		self.session = s
+
+	def test_create_access_token(self):
+		"""
+		Method should return an OAuthToken object.
+		"""
+		pass

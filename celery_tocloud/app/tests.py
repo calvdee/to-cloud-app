@@ -77,7 +77,7 @@ class TasksTest(unittest.TestCase):
 
 	def test_upload_file(self):
 		""" Uploads the file file to Dropbox """
-		upload_file(self.url_file, ACCESS_KEY, SECRET)
+		url_upload(self.url_file, ACCESS_KEY, SECRET)
 
 		# Did the file get created?
 		# meta = self.client.search('.', self.url_file_name)
@@ -85,6 +85,7 @@ class TasksTest(unittest.TestCase):
 
 	def test_run_upload_file(self):
 		""" Runs the download task calling the ``delay`` method """
+		pass
 		
 if __name__ == '__main__':
 	unittest.main()

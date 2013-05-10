@@ -9,14 +9,16 @@ from celery_tocloud.app.main import celery
 from celery_tocloud.app import celeryconfig
 
 conf = celery.conf
-statsd = statsd.StatsClient(prefix='xx.apps.upload_worker')
+statsd = statsd.StatsClient(prefix='apps.upload_worker')
 
 ## Helpers
 
 def marker(length=35): print '*'*length
 
 def get_dropbox_client(access_key, secret):
-	
+	"""
+	Creates a Dropbox session from the credentials 
+	"""
 	# Create the session
 	s = session.DropboxSession(
 		conf.APP_KEY, conf.APP_SECRET, conf.ACCESS_TYPE)
@@ -30,13 +32,13 @@ def get_dropbox_client(access_key, secret):
 ## Tasks
 
 @celery.task
-def upload_file(url, access_key, secret):
+def url_upload(url, access_key, secret):
 	"""
 	Uploads to Dropbox what `url` points to.
 	"""
 
 	marker()
-	print "Received task <upload_file> for '%s'" % url
+	print "Received task <url_upload> for '%s'" % url
 
 	# Obtain a client
 	client = get_dropbox_client(access_key, secret)
@@ -56,12 +58,12 @@ def upload_file(url, access_key, secret):
 		uploader.upload_chunked(conf.CHUNK_SIZE)
 
 		# Commit 
-		print "Committing upload for %s" % url
+		print "Committing upload for '%s'" % url
 		uploader.finish('%s' % url_file_name, True)
 
 	except rest.ErrorResponse as e:
 		# TODO: Retry the task
-		print "Failed to download file %s (%s)" % (url, str(e))
+		print "Failed to upload file %s (%s)" % (url, str(e))
 
 
 # # Open the file
