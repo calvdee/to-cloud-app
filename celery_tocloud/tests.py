@@ -1,19 +1,23 @@
 import unittest
 import requests
 import json
-from celery_tocloud.app.tasks import upload_file, get_dropbox_client
+import time
+
+from celery_tocloud.models import OAuthToken, URLUpload
+from celery_tocloud.app.tasks import upload_url, get_dropbox_client
+
 from dropbox import rest, client
 
 ACCESS_KEY = 'n63mv83arjv1ane'
 SECRET = '4rbk8o1mu1z3tz5'
 
-dropbox_client = get_dropbox_client(ACCESS_KEY, SECRET)
+_token = OAuthToken.objects.create(access_key=ACCESS_KEY, secret=SECRET)
 
 class DropboxTest(unittest.TestCase):
 	chunk_size = 4194304
 
 	def setUp(self):
-		self.client = dropbox_client
+		self.client = get_dropbox_client(_token)
 		self.file_name = 'cc.txt'
 		self.url_file = 'https://www.dropbox.com/static/developers/dropbox-python-sdk-1.5.1.zip'
 		self.url_file_name = self.url_file.split('/')[-1:][0]
@@ -60,31 +64,48 @@ class DropboxTest(unittest.TestCase):
 		Create a client with bad auth and c.account_info should throw
 		an `ErrorResponse`.
 		"""
-		c = get_dropbox_client("xx", "xx")
+		c = get_dropbox_client(None)
 		fn = c.account_info
 		
-		self.assertRaises(rest.ErrorResponse, fn)
+		self.assertRaises(AttributeError, fn)
 		
 class TasksTest(unittest.TestCase):
-	url_file = 'https://github.com/dropbox/async_dropbox/archive/master.zip'
+	url_file = 'http://dl.soundowl.com/5bez.mp3'
+	file_created = False
 
 	def setUp(self):
-		self.client = dropbox_client
+		self.client = get_dropbox_client(_token)
 		self.url_file_name = self.url_file.split('/')[-1:][0]
 
 	def tearDown(self):
-		self.client.file_delete('%s' % self.url_file_name)
+		""" Remove the file from Dropbox if it was created. """
+		if self.file_created is True:
+			self.client.file_delete('%s' % self.url_file_name)
 
-	def test_upload_file(self):
+	def test_upload_url(self):
 		""" Uploads the file file to Dropbox """
 		
-		upload_file(self.url_file, ACCESS_KEY, SECRET)
+		# Setup the URLUpload properties
+		email = 'calvindlm@gmail.com'
+		url = self.url_file
+		token = OAuthToken.objects.create(access_key=ACCESS_KEY, secret=SECRET)
+		
+		# Create the object
+		o = URLUpload.objects.create(email=email,
+																 url=url,
+																 access_token=token)
+
+		# Sanity check
+		self.assertNotEqual(o.id, None)
+
+		# Run the task ;)
+		upload_url(o.id)
 
 		# Did the file get created?
 		meta = self.client.search('.', self.url_file_name)
 		self.assertNotEqual(len(meta), 0)
 
-	def test_run_upload_file(self):
+	def test_run_url_upload(self):
 		""" 
 		Runs the download task calling the ``upload_file.delay`` method 
 		"""
@@ -93,15 +114,25 @@ class TasksTest(unittest.TestCase):
 		except rest.ErrorResponse:
 			pass
 
-		t = upload_file.delay(self.url_file, ACCESS_KEY, SECRET)
-
-		while t.state is "PENDING":
-			print "Waiting for task to complete..."
+		# Create the ``URLUpload`` object
+		token = OAuthToken.objects.create(access_key=ACCESS_KEY, secret=SECRET)
+		# Create the object
+		o = URLUpload.objects.create(email='calvindlm@gmail.com',
+																 url='http://www.greenteapress.com/thinkstats/thinkstats.pdf',
+																 access_token=token)
+		
+		self.assertNotEqual(o.id, None)
+		self.assertNotEqual(len(URLUpload.objects.filter(id=o.id)), 0)
+		task = upload_url.delay(o.id)
+		while task.state is "PENDING":
+			print 'polling'
 		
 		# Did the file get created?
-		meta = self.client.search('.', self.url_file_name)
-		self.assertNotEqual(len(meta), 0)
+		# meta = self.client.search('.', self.url_file_name)
+		# self.assertNotEqual(len(meta), 0)
 
+		# Set for cleanup
+		# self.file_created = True
 		
 if __name__ == '__main__':
 	unittest.main()

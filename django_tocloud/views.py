@@ -15,7 +15,7 @@ class URLUploadFormView(FormView):
 
   template_name = 'home.html'
   form_class = URLForm
-  success_url = '/app/auth/'
+  # success_url = reverse('dropbox_auth_view')
 
   def form_valid(self, form):
     """
@@ -31,6 +31,8 @@ class URLUploadFormView(FormView):
     s['url'] = form.clean().get('url')    
     s['email'] = form.clean().get('email')    
 
+    # Generates the Dropbox authorization URL and puts it in
+    # the session.
     self.generate_drobox_auth(s)
 
     # This method is called when valid form data has been POSTed.
@@ -70,7 +72,9 @@ class DropboxAuthView(TemplateView):
     """
     context = self.get_context_data(**kwargs)
 
-    check_session(request.session)
+    if not is_valid_session(request.session):
+      return redirect('upload_url_view')
+
     
     # Add the data to the context
     context['dropbox_auth_url'] = request.session.get('dropbox_auth_url')
@@ -102,7 +106,7 @@ class FinalView(TemplateView):
 
       # Create the objects
       token = create_access_token(req_token)
-      url_upload = URLUpload.objects.create(email=s.get('email'), 
+      upload_url = URLUpload.objects.create(email=s.get('email'), 
                                             url=s.get('url'),
                                             access_token=token)
       # Start the job
@@ -126,7 +130,10 @@ class FinalView(TemplateView):
     
     return o
 
-def check_session(session):
-  """ Checks to see if there is a valid session, redirects if not """
-  if len(session.keys()) is 0:
-    return redirect('url_upload_view')
+def is_valid_session(session):
+  """ Checks to see if there is form data in the session. """
+  if not session.get('email') and not session.get('url'):
+    return False
+
+  return true
+    

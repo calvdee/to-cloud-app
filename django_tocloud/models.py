@@ -21,7 +21,9 @@ class URLUpload(models.Model):
 	url = models.URLField()	
 	access_token = models.ForeignKey(OAuthToken)
 	state = models.IntegerField(default=states.CREATED)
-
+	created = models.DateTimeField(auto_now_add=True)
+	started = models.DateTimeField(null=True)
+	ended = models.DateTimeField(null=True)
 
 class DropboxConfig():
 	APP_KEY = '3wt9hriil3ozkwb'

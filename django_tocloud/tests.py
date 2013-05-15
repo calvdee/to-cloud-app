@@ -24,21 +24,16 @@ class URLUploadTest(TestCase):
 	def test_models(self):
 		""" Test the model classes """
 
-		# User
-		user = User.objects.create(username="Calvin",
-										 email="calvindlm@gmail.com",
-										 password="qweqwe")
-
-		query = User.objects.filter(id=user.id)
-
-		self.assertNotEqual(user.id, None)
-		self.assertNotEqual(len(query), 0)
+		# Token
+		token = OAuthToken.objects.create(access_key='foo', secret='bar')
 
 		# URLUpload
 		url = "http://vts.uni-ulm.de/docs/2012/8082/vts_8082_11772.pdf"
-		upload = URLUpload.objects.create(user=user, url=url)
+		url_upload = URLUpload.objects.create(email='calvindlm@gmail.com',
+																					url='foo.com',
+																					access_token=token)
 
-		self.assertEqual(upload.state, states.CREATED)
+		self.assertEqual(url_upload.state, states.CREATED)
 
 
 class URLUploadFormViewTest(TestCase):
@@ -61,7 +56,7 @@ class URLUploadFormViewTest(TestCase):
 		}
 		
 		# POST to get the session
-		response = client.post(reverse('url_upload_view'), data)
+		response = client.post(reverse('upload_url_view'), data)
 
 		# Make sure the test cookie was set
 		self.assertNotEqual(client.session, {})
