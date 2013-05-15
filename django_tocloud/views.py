@@ -101,10 +101,10 @@ class FinalView(TemplateView):
     auth_success = not request.GET.get('not_approved')
 
     if auth_success:
-      s = request.session
-      req_token = get_access_token(s.get('request_token'))
+      # Get the `request_token` from the session
+      request_token = request.session.get('request_token')
 
-      # Create the objects
+      # Create the ``OAuthToken`` and ``URLUpload`` objects
       token = create_access_token(req_token)
       upload_url = URLUpload.objects.create(email=s.get('email'), 
                                             url=s.get('url'),
