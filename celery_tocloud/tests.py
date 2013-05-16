@@ -123,9 +123,11 @@ class TasksTest(unittest.TestCase):
 		
 		self.assertNotEqual(o.id, None)
 		self.assertNotEqual(len(URLUpload.objects.filter(id=o.id)), 0)
-		task = upload_url.delay(o.id)
-		while task.state is "PENDING":
-			print 'polling'
+		task = upload_url.delay(o.id, o)
+
+		while not task.ready():
+			time.sleep(1)
+			print "Waiting..."
 		
 		# Did the file get created?
 		# meta = self.client.search('.', self.url_file_name)

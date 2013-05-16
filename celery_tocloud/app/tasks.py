@@ -9,6 +9,7 @@ from dropbox import client, rest, session
 from celery_tocloud.app.main import celery
 from celery_tocloud.app import celeryconfig
 from celery_tocloud.models import URLUpload
+
 # from BeautifulSoup import BeautifulSoup, SoupStrainer
 
 conf = celery.conf
@@ -38,7 +39,7 @@ def get_dropbox_client(token):
 ## Tasks
 
 @celery.task
-def upload_url(url_upload_id):
+def upload_url(url_upload_id, url_upload_o=None):
 	"""
 	Gets the URLUpload object for the ID puts the ``url`` to Dropbox
 	"""
@@ -46,14 +47,17 @@ def upload_url(url_upload_id):
 	marker()
 	print "Received task `upload_url` for URLUpload ID '%s'" % url_upload_id
 
-	# Obtain a client using object from url_upload_id 
-	o_lst = URLUpload.objects.select_related().filter(id=url_upload_id)
+	if url_upload_o is None:
+		# Use an ID to get the object
+		try:
+			o_lst = URLUpload.objects.select_related().get(id=url_upload_id)
+		except URLUpload.DoesNotExist:
+			# Does not exist exception should be thrown
+			raise Exception("ERROR: No URLUpload found for %s" % url_upload_id)
+	else:
+		# Use the passed object for testing since data does not come from test DB
+		url_upload = url_upload_o
 
-	if len(o_lst) is 0:
-		# No object
-		raise Exception("ERROR: No URLUpload found for %s" % url_upload_id)
-
-	url_upload = o_lst[0]
 	url = url_upload.url
 	token = url_upload.access_token
 	
