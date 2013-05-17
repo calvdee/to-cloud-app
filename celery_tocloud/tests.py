@@ -98,8 +98,9 @@ class TasksTest(unittest.TestCase):
 		# Sanity check
 		self.assertNotEqual(o.id, None)
 
-		# Run the task ;)
-		upload_url(o.id)
+		# Test the task method, pass in the object since celery
+		# won't use the test database so it won't find the ``id``.
+		upload_url(o.id, url_upload_o=o)
 
 		# Did the file get created?
 		meta = self.client.search('.', self.url_file_name)

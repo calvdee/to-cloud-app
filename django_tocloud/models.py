@@ -1,6 +1,8 @@
 from django.db import models
 from django_tocloud import states
 from dropbox import client, rest, session
+from django.core.mail import send_mail
+from django.conf import settings
 
 # Create your models here.
 
@@ -24,6 +26,17 @@ class URLUpload(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	started = models.DateTimeField(null=True)
 	ended = models.DateTimeField(null=True)
+
+	def send_success_email(self):
+		"""
+		Sends a success email to ``email`` to notify that the upload has
+		completed to Dropbox.
+		"""
+		print "SENDING with %s" % settings.EMAIL_HOST
+		print "SENDING with %s" % settings.EMAIL_PORT
+		# Straight example rip, just use to console to verify.
+		send_mail('Subject here', 'Here is the message.', 'from@example.com',
+			['to@example.com'], fail_silently=False)
 
 class DropboxConfig():
 	APP_KEY = '3wt9hriil3ozkwb'

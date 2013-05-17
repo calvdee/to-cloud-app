@@ -162,6 +162,11 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+# SMTP Server Settings
+EMAIL_PORT = 1025
+EMAIL_HOST = 'localhost'
+
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

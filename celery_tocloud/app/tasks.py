@@ -4,20 +4,19 @@ import requests
 import statsd
 import re
 
+from django.core.mail import send_mail
 from celery import group, chain, chord, Task
 from dropbox import client, rest, session
 from celery_tocloud.app.main import celery
 from celery_tocloud.app import celeryconfig
 from celery_tocloud.models import URLUpload
 
-# from BeautifulSoup import BeautifulSoup, SoupStrainer
-
 conf = celery.conf
 statsd = statsd.StatsClient(prefix='apps.upload_worker')
 
 ## Helpers
 
-def marker(length=35): print '*'*length
+def marker(length=50): print '*'*length
 
 def get_dropbox_client(token):
 	"""
@@ -31,16 +30,23 @@ def get_dropbox_client(token):
 	s.set_token(token.access_key, token.secret)
 
 	# Return the client
-	return client.DropboxClient(s)
+	return client.DropboxClient(s) 
 
-# def log(msg):
-# 	print 
+def on_chunk_uploaded(total, url_upload): 
+	""" 
+	Callback for when a chunk is uploaded. Prints the number of bytes
+	uploaded and the URLUpload's ``id`` and ``url``.
+	"""
+
+	print "Uploaded chunk, %s bytes total for url %s ID %s " % 
+		(total, url_upload.url, url.id)
 
 ## Tasks
 
 @celery.task
 def upload_url(url_upload_id, url_upload_o=None):
 	"""
+
 	Gets the URLUpload object for the ID puts the ``url`` to Dropbox
 	"""
 
@@ -80,21 +86,27 @@ def upload_url(url_upload_id, url_upload_o=None):
 		uploader = client.ChunkedUploader(client, url_file, 57671680)
 
 		# Upload
-		def callback(total): print "Recieved %s" % total
-
-		print "Beginning upload for '%s'" % url_upload.url
-
-		print "Uploading chunk"
-		uploader.upload_chunked(chunk_size = 1 * 1024 * 1024)
-		print "Finished uploading chunk"
+		print "BEGINNING upload for '%s'" % url_upload.url
+		uploader.upload_chunked(chunk_size = 1 * 1024 * 1024, cb=on_chunk_uploaded)
 
 		# Commit 
-		print "Committing upload for '%s'" % url
+		print "COMMITING upload for '%s'" % url
 		uploader.finish('%s' % url_file_name, True)
 
+		# Send email
+		send_mail("Upload complete", 
+							"Your email for %s" % url_upload.url , 
+							"uploads@tocloudapp.com"
+    					[url_upload.email], 
+    					fail_silently=False)
+
+		url_upload.state = 
 	except rest.ErrorResponse as e:
 		# TODO: Retry the task
 		print "Failed to upload file %s (%s)" % (url, str(e))
+
+	url_upload.ended = datetime.today()
+
 
 
 # # Open the file

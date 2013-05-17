@@ -16,25 +16,26 @@ class URLUploadTest(TestCase):
 	""" Tests the URLUpload model """
 
 	def setUp(self):
-		pass
-
-	def tearDown(self):
-		pass
-
-	def test_models(self):
-		""" Test the model classes """
-
+		"""
+		Create and validate the ``URLUpload`` object for the test.
+		"""
 		# Token
 		token = OAuthToken.objects.create(access_key='foo', secret='bar')
 
 		# URLUpload
 		url = "http://vts.uni-ulm.de/docs/2012/8082/vts_8082_11772.pdf"
-		url_upload = URLUpload.objects.create(email='calvindlm@gmail.com',
+		self.url_upload = URLUpload.objects.create(email='calvindlm@gmail.com',
 																					url='foo.com',
 																					access_token=token)
+		
+		self.assertEqual(self.url_upload.state, states.CREATED)
 
-		self.assertEqual(url_upload.state, states.CREATED)
+	def tearDown(self):
+		pass
 
+	def test_send_success_email(self):
+		""" Sends an email to the configured email backend """
+		self.url_upload.send_success_email()
 
 class URLUploadFormViewTest(TestCase):
 	""" 
