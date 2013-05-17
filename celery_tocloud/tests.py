@@ -3,6 +3,7 @@ import requests
 import json
 import time
 
+from django_tocloud import states
 from celery_tocloud.models import OAuthToken, URLUpload
 from celery_tocloud.app.tasks import upload_url, get_dropbox_client
 
@@ -102,7 +103,12 @@ class TasksTest(unittest.TestCase):
 		# won't use the test database so it won't find the ``id``.
 		upload_url(o.id, url_upload_o=o)
 
-		# Did the file get created?
+		# Fields should have been updated
+		updated = URLUpload.objects.get(id=o.id)
+		self.assertEqual(updated.state, states.SUCCESS)
+		self.assertNotEqual(updated.ended, None)
+
+		# File was created
 		meta = self.client.search('.', self.url_file_name)
 		self.assertNotEqual(len(meta), 0)
 
@@ -119,7 +125,7 @@ class TasksTest(unittest.TestCase):
 		token = OAuthToken.objects.create(access_key=ACCESS_KEY, secret=SECRET)
 		# Create the object
 		o = URLUpload.objects.create(email='calvindlm@gmail.com',
-																 url='http://www.greenteapress.com/thinkstats/thinkstats.pdf',
+																 url='https://si0.twimg.com/profile_images/1252505253/elephant_rgb_sq.png',
 																 access_token=token)
 		
 		self.assertNotEqual(o.id, None)

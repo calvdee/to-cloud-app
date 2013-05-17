@@ -4,9 +4,11 @@ import requests
 import statsd
 import re
 
+from datetime import datetime
 from django.core.mail import send_mail
 from celery import group, chain, chord, Task
 from dropbox import client, rest, session
+from django_tocloud import states
 from celery_tocloud.app.main import celery
 from celery_tocloud.app import celeryconfig
 from celery_tocloud.models import URLUpload
@@ -32,14 +34,10 @@ def get_dropbox_client(token):
 	# Return the client
 	return client.DropboxClient(s) 
 
-def on_chunk_uploaded(total, url_upload): 
-	""" 
-	Callback for when a chunk is uploaded. Prints the number of bytes
-	uploaded and the URLUpload's ``id`` and ``url``.
-	"""
-
-	print "Uploaded chunk, %s bytes total for url %s ID %s " % 
-		(total, url_upload.url, url.id)
+def on_chunk_uploaded(total, **kwargs):
+	url_upload = kwargs.get('upload_url') 
+	print "Uploaded chunk, %s bytes total for url %s ID %s" % (
+		total, url_upload.url, url_upload.id)
 
 ## Tasks
 
@@ -82,30 +80,34 @@ def upload_url(url_upload_id, url_upload_o=None):
 
 		# Stats
 		# with statsd.timer('timers.url_upload'):
-		
 		uploader = client.ChunkedUploader(client, url_file, 57671680)
 
 		# Upload
+
 		print "BEGINNING upload for '%s'" % url_upload.url
-		uploader.upload_chunked(chunk_size = 1 * 1024 * 1024, cb=on_chunk_uploaded)
+		uploader.upload_chunked(chunk_size = 1 * 1024 * 1024, 
+														cb=on_chunk_uploaded,
+														cb_kwargs={'upload_url': url_upload})
 
 		# Commit 
-		print "COMMITING upload for '%s'" % url
+		print "COMMITING upload for '%s'" % url_upload.url
 		uploader.finish('%s' % url_file_name, True)
 
 		# Send email
 		send_mail("Upload complete", 
-							"Your email for %s" % url_upload.url , 
-							"uploads@tocloudapp.com"
+							"Your upload for %s has completed!" % url_upload.url, 
+							"uploads@tocloudapp.com",
     					[url_upload.email], 
     					fail_silently=False)
 
-		url_upload.state = 
+		url_upload.state = states.SUCCESS
 	except rest.ErrorResponse as e:
 		# TODO: Retry the task
+		url_upload.state = states.FAILED
 		print "Failed to upload file %s (%s)" % (url, str(e))
 
 	url_upload.ended = datetime.today()
+	url_upload.save()
 
 
 
