@@ -36,3 +36,4 @@ nosetests.xml
 .pydevproject
 
 static/*
+local_settings.py

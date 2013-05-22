@@ -39,9 +39,9 @@ class URLUpload(models.Model):
 			['to@example.com'], fail_silently=False)
 
 class DropboxConfig():
-	APP_KEY = '3wt9hriil3ozkwb'
-	APP_SECRET = 'yqjvj22cenl85bv'
-	ACCESS_TYPE = 'app_folder'
+	app_key = settings.APP_KEY
+	app_secret = settings.APP_SECRET
+	access_type = settings.ACCESS_TYPE
 
 	@staticmethod
 	def get_session():
